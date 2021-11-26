@@ -19,4 +19,12 @@ Constantes e atributos:
     socket.type: tipo do socket criado
     socket.proto: protocolo associado ao socket
 
-
+Criar socket objeto:
+    Familia de endereços:
+        AF_INET: endereço IPv4
+        AF_INET6: endereço IPv6
+    Tipo de socket:
+        SOCK_STREAM: para socket TCP
+        SOCK_DGRAM: para socket UDP
+    Protocolo(variação do protocolo em uma familia):
+        Geralmente zero
