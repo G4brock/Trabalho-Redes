@@ -1,0 +1,30 @@
+Socket:
+    accept(): aceita uma conexão de cliente
+    bind(endereço): associa o socket servidor a um endereço
+    close(): fecha um socket, liberando todas os recursos alocados
+    connect(endereço): conecta um cliente a um endereço
+    connect_ex(endereço): idem anterior, retornando um indicador de erro, em vez de uma exceção, na ocorrência da chamda do connect em baixo nivel
+    getpeername(): retorna o endereço do socket remoto com o qual um socket local está associado
+    getsockname(): retorna o endereço do socket local
+    listen([backlog]): começa a escutar pedidos de consultas
+
+Envio e leitura de bytes:
+    recv(bufsize[, flags]): le os bytes recebidos, retornando-os em uma string, até o limite de buffer definido por buffsize
+    recvfrom(bufsize[, flags]): (UDP) lê os bytes recebidos, retornando-os em uma string, até o limite de buffer definido por buffsize
+    send(bytes[, flags]): solicita o envio dos bytes pelo socket até que um certo conjunto de bytes seja enviado - buffer suficiente para garantir o envio
+    sendall(bytes[, flags]): envia todos os bytes passados como parâmetro, o que ocasiona sucessivos envios em chamadas de sistema até que todos os bytes sejam enviados
+
+Constantes e atributos:
+    socket.family: familia do socket criado
+    socket.type: tipo do socket criado
+    socket.proto: protocolo associado ao socket
+
+Criar socket objeto:
+    Familia de endereços:
+        AF_INET: endereço IPv4
+        AF_INET6: endereço IPv6
+    Tipo de socket:
+        SOCK_STREAM: para socket TCP
+        SOCK_DGRAM: para socket UDP
+    Protocolo(variação do protocolo em uma familia):
+        Geralmente zero
