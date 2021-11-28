@@ -47,7 +47,7 @@ class GerenciadorProtocol(asyncio.Protocol):
                     valor = json.dumps(leituras, separators=(",", ""))
                 else:
                     valor = json.dumps({_identificador: leituras[_identificador]})
-                self.transport.write(f"xxx { valor }\n".encode("utf-8"))
+                self.transport.write(f"230 { valor }\n".encode("utf-8"))
             except:
                 self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
 
