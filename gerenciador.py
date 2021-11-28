@@ -50,8 +50,6 @@ class GerenciadorProtocol(asyncio.Protocol):
                 self.transport.write(f"xxx { valor }\n".encode("utf-8"))
             except:
                 self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
-            else:
-                self.transport.write("200 Ok\n".encode("utf-8"))
 
         if command == "ATON":
             _identificador = message[1]
