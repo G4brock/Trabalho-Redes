@@ -87,6 +87,15 @@ class GerenciadorProtocol(asyncio.Protocol):
 
         return super().data_received(data)
 
+    def connection_lost(self, exc: Union[Exception, None]) -> None:
+        if self.identificador:
+            for con in conexoes:
+                if con.id == self.identificador:
+                    conexoes.remove(con)
+
+            leituras.pop(self.identificador)
+        return super().connection_lost(exc)
+
 
 async def main():
     loop = asyncio.get_event_loop()
