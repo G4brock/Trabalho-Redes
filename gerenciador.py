@@ -2,7 +2,8 @@ import asyncio
 import json
 from asyncio import transports
 from collections import namedtuple
-from typing import final
+from typing import final, Union
+from exceptions import IdentificadorEmUso
 
 Conections = namedtuple("Conection", ["id", "type", "transport"])
 
@@ -11,26 +12,43 @@ conexoes = []
 
 
 class GerenciadorProtocol(asyncio.Protocol):
+    def __init__(self) -> None:
+        self.identificador = None
+        super().__init__()
+
     def connection_made(self, transport: transports.BaseTransport) -> None:
         self.transport = transport
         return super().connection_made(transport)
 
     def data_received(self, data: bytes) -> None:
         message = data.decode().strip()
-        print(f"Mensagem recebida: { message }")
+        print(f"Mensagem recebida: { message }; De: { self.identificador }")
         message = message.split(" ")
 
         command = message[0]
         if command == "HELO":
             try:
-                self.identificador = message[1]
-                conexoes.append(
-                    Conections(self.identificador, message[2], self.transport)
+                identificador = message[1]
+                for con in conexoes:
+                    if con.id == identificador:
+                        raise IdentificadorEmUso
+
+                self.identificador = identificador
+                self.conexao = Conections(
+                    self.identificador, message[2], self.transport
                 )
+                conexoes.append(self.conexao)
+            except IdentificadorEmUso:
+                self.transport.write("410 Identificador em uso.".encode("utf-8"))
+                self.transport.close()
             except:
                 self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
             else:
                 self.transport.write(f"220 gerenciador Pronto\n".encode("utf-8"))
+
+        if self.identificador == None:
+            self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
+            return
 
         if command == "SEND":
             try:

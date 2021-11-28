@@ -1,0 +1,2 @@
+class IdentificadorEmUso(Exception):
+    pass
