@@ -93,7 +93,9 @@ class GerenciadorProtocol(asyncio.Protocol):
                 if con.id == self.identificador:
                     conexoes.remove(con)
 
-            leituras.pop(self.identificador)
+            if self.identificador in leituras.keys():
+                leituras.pop(self.identificador)
+
         return super().connection_lost(exc)
 
 
