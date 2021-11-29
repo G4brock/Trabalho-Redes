@@ -22,7 +22,6 @@ class ThreadSimulador(threading.Thread):
         global ATUADORES
         while True:
             for atuador in ATUADORES:
-                print(atuador)
                 if atuador["status"] == True:
                     if atuador["tipo"] == "aquecedor":
                         TEMPERATURA = TEMPERATURA + 0.5
@@ -46,12 +45,9 @@ class ServidorWeb(server.BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         global ATUADORES
         valores = self.path.strip().split("/")
-        print(valores)
-
         novo = True
         for atuador in ATUADORES:
             if atuador["identificador"] == valores[1]:
-                print(atuador, valores)
                 atuador["status"] = True if valores[2].lower() == "true" else False
                 novo = False
 
