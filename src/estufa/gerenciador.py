@@ -136,7 +136,7 @@ async def controlador():
             if conn.type in ligar:
                 conn.transport.write(f"ATON { conn.id }\n")
             if conn.type in desligar:
-                conn.transport.write(f"ATof { conn.id }\n")
+                conn.transport.write(f"ATOF { conn.id }\n")
         await asyncio.sleep(1)
 
 
