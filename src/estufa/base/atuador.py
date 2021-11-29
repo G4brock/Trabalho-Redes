@@ -5,10 +5,10 @@ import socket
 import requests
 
 class Atuador:
-    def __init__(self, tipo, status, identificador):
+    def __init__(self, tipo, identificador, tipo2):
         self.tipo = tipo
-        self.status = status
         self.identificador = identificador
+        self.tipo2 = tipo2
         
 def client(atuador, host="127.0.0.1", port=8000):
     # Create a TCP/IP socket
@@ -23,13 +23,14 @@ def client(atuador, host="127.0.0.1", port=8000):
         while True:
             data = sock.recv(1000)
             print(data.decode("utf-8"), "A")
-            data = data.split()
+            data = data.decode().split()
+            print("\t" + data[1])
             if data[1] == atuador.identificador:
                 if data[0] == "ATON":
-                    atuador.status = "true"
-                else:
-                    atuador.status = "false"
-                teste = requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/' + atuador.status + '/' + atuador.tipo)
+                    teste = requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/true/' + atuador.tipo2)
+                if data[0] == "ATOF":
+                    teste = requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/false/' + atuador.tipo2)
+                
             sock.send("200 OK".encode("utf-8"))
         
     except socket.error as e:
@@ -39,9 +40,3 @@ def client(atuador, host="127.0.0.1", port=8000):
     finally:
         print("Closing connection to the server")
         sock.close()
-
-def main():
-    atuador = Atuador("ATUADOR_AQUECEDOR", "false", "teste")
-    client(atuador)
-
-main()
