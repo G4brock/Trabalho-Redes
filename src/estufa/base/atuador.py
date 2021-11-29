@@ -2,9 +2,15 @@ import asyncio
 import json
 from os import wait
 import socket
-import http
+import requests
 
-def client(host="127.0.0.1", port=8000):
+class Atuador:
+    def __init__(self, tipo, status, identificador):
+        self.tipo = tipo
+        self.status = status
+        self.identificador = identificador
+        
+def client(atuador, host="127.0.0.1", port=8000):
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Connect the socket to the server
@@ -13,34 +19,19 @@ def client(host="127.0.0.1", port=8000):
     sock.connect(server_address)
     # Send data
     try:
+        sock.send(f"HELO { atuador.identificador } {atuador.tipo}\n".encode("utf-8"))
+        while True:
+            data = sock.recv(1000)
+            print(data.decode("utf-8"), "A")
+            data = data.split()
+            if data[1] == atuador.identificador:
+                if data[0] == "ATON":
+                    atuador.status = "true"
+                else:
+                    atuador.status = "false"
+                teste = requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/' + atuador.status + '/' + atuador.tipo)
+            sock.send("200 OK".encode("utf-8"))
         
-        data = "ATON <SP> <identificador> <LF>"#sock.recv(1000)
-        data = data.split()
-
-        teste = http.client.HTTPConection('http://127.0.0.1:3000')
-       
-        print(data)
-
-        # HELLO
-        #message = "HELO temp-fake1 TEMPERATURE_SENSOR \n"
-        #print("Sending %s" % message.strip("\n"))
-        #sock.sendall(message.encode("utf-8"))
-        #data = sock.recv(1000)
-        #print("Received: %s" % data)
-
-        #for i in range(0, 5):
-        #    message = f"SEND { str(30 + i) }\n"
-        #    print("Sending %s" % message.strip("\n"))
-        #    sock.sendall(message.encode("utf-8"))
-        #    data = sock.recv(1000)
-        #    print("Received: %s" % data)
-
-        # QUIT
-        #message = "QUIT \n"
-        #print("Sending %s" % message.strip("\n"))
-        #sock.sendall(message.encode("utf-8"))
-        #data = sock.recv(1000)
-        #print("Received: %s" % data)
     except socket.error as e:
         print("Socket error: %s" % str(e))
     except Exception as e:
@@ -49,4 +40,8 @@ def client(host="127.0.0.1", port=8000):
         print("Closing connection to the server")
         sock.close()
 
-client()
+def main():
+    atuador = Atuador("ATUADOR_AQUECEDOR", "false", "teste")
+    client(atuador)
+
+main()

@@ -113,9 +113,13 @@ async def controlador():
         desligar = []
         for conn in conexoes:
             if conn.type == "SENSOR_TEMPERATURA":
-                if leituras[conn.id] > MAX_TEMP:
-                    ligar.append("ATUADOR_AQUECEDOR")
                 if leituras[conn.id] < MIN_TEMP:
+                    ligar.append("ATUADOR_AQUECEDOR")
+                if leituras[conn.id] > MAX_TEMP:
+                    ligar.append("ATUADOR_RESFRIADOR")
+                if leituras[conn.id] > MIN_TEMP:
+                    desligar.append("ATUADOR_AQUECEDOR")
+                if leituras[conn.id] < MAX_TEMP:
                     desligar.append("ATUADOR_RESFRIADOR")
             if conn.type == "SENSOR_UMIDADE":
                 if leituras[conn.id] < MIN_UMID:
