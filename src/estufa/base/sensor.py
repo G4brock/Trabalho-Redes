@@ -19,7 +19,6 @@ async def sensor(identificador: str, tipo: str):
 
     while True:
         try:
-            print("a")
             writer.write(f"SEND { VALOR }\n".encode())
             await writer.drain()
 
