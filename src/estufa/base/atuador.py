@@ -2,7 +2,7 @@ import asyncio
 import json
 from os import wait
 import socket
-import aiohttp
+import http
 
 def client(host="127.0.0.1", port=8000):
     # Create a TCP/IP socket
@@ -17,11 +17,7 @@ def client(host="127.0.0.1", port=8000):
         data = "ATON <SP> <identificador> <LF>"#sock.recv(1000)
         data = data.split()
 
-        timeout = aiohttp.ClientTimeout(total=1)
-
-        with aiohttp.ClientSession(timeout=timeout) as session:
-            with session.get("http://127.0.0.1:3000/server/") as response:
-                    data = json.loads(response.text())
+        teste = http.client.HTTPConection('http://127.0.0.1:3000')
        
         print(data)
 
