@@ -60,7 +60,7 @@ class GerenciadorProtocol(asyncio.Protocol):
 
         if command == "SEND":
             try:
-                leituras[self.identificador] = int(message[1])
+                leituras[self.identificador] = float(message[1])
             except:
                 self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
             else:
@@ -134,9 +134,9 @@ async def controlador():
 
         for conn in conexoes:
             if conn.type in ligar:
-                conn.transport.write(f"ATON { conn.id }\n")
+                conn.transport.write(f"ATON { conn.id }\n".encode("utf-8"))
             if conn.type in desligar:
-                conn.transport.write(f"ATOF { conn.id }\n")
+                conn.transport.write(f"ATOF { conn.id }\n".encode("utf-8"))
         await asyncio.sleep(1)
 
 
