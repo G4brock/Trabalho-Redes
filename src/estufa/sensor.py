@@ -33,14 +33,14 @@ async def sensor(identificador: str, tipo: str):
 
 
 async def get_data(medida: str):
+    global VALOR
     timeout = aiohttp.ClientTimeout(total=1)
     while True:
         try:
-            print("b")
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.get("http://127.0.0.1:3000/server/") as response:
-                    data = await response.json()
-                    TEMPERATURA = data[medida]
+                    data = json.loads(await response.text())
+                    VALOR = data[medida]
         except:
             pass
         finally:
