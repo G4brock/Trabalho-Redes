@@ -84,8 +84,13 @@ class GerenciadorProtocol(asyncio.Protocol):
         if command == "READ":
             try:
                 _identificador = message[1]
+                valor = {}
                 if _identificador == "ALL":
-                    valor = json.dumps(leituras, separators=(",", ""))
+
+                    valor = json.dumps(
+                        {"leituras": leituras, "limites": limites},
+                        separators=(",", ":"),
+                    )
                 else:
                     valor = json.dumps({_identificador: leituras[_identificador]})
                 self.transport.write(f"230 { valor }\n".encode("utf-8"))
