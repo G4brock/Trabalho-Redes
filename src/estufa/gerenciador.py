@@ -9,12 +9,14 @@ Conections = namedtuple("Conection", ["id", "type", "transport"])
 
 leituras = {}
 conexoes = []
-MAX_TEMP = 40
-MIN_TEMP = 20
-MAX_UMID = 50
-MIN_UMID = 30
-MAX_CO2 = 50
-MIN_CO2 = 10
+limites = {
+    "MAX_TEMP": 40,
+    "MIN_TEMP": 20,
+    "MAX_UMID": 50,
+    "MIN_UMID": 30,
+    "MAX_CO2": 50,
+    "MIN_CO2": 10,
+}
 
 
 class GerenciadorProtocol(asyncio.Protocol):
@@ -57,6 +59,19 @@ class GerenciadorProtocol(asyncio.Protocol):
         if self.identificador == None:
             self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
             return
+
+        if command == "ATPA":
+            try:
+                param = message[1]
+                valor = float(message[2])
+
+                if param in limites.keys():
+                    limites[param] = valor
+                    self.transport.write("200 Ok\n".encode("utf-8"))
+                else:
+                    raise Exception
+            except:
+                self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
 
         if command == "SEND":
             try:
@@ -113,23 +128,23 @@ async def controlador():
         desligar = []
         for conn in conexoes:
             if conn.type == "SENSOR_TEMPERATURA":
-                if leituras[conn.id] < MIN_TEMP:
+                if leituras[conn.id] < limites["MIN_TEMP"]:
                     ligar.append("ATUADOR_AQUECEDOR")
-                if leituras[conn.id] > MAX_TEMP:
+                if leituras[conn.id] > limites["MAX_TEMP"]:
                     ligar.append("ATUADOR_RESFRIADOR")
-                if leituras[conn.id] > MIN_TEMP:
+                if leituras[conn.id] > limites["MIN_TEMP"]:
                     desligar.append("ATUADOR_AQUECEDOR")
-                if leituras[conn.id] < MAX_TEMP:
+                if leituras[conn.id] < limites["MAX_TEMP"]:
                     desligar.append("ATUADOR_RESFRIADOR")
             if conn.type == "SENSOR_UMIDADE":
-                if leituras[conn.id] < MIN_UMID:
+                if leituras[conn.id] < limites["MIN_UMID"]:
                     ligar.append("ATUADOR_RESFRIADOR")
-                if leituras[conn.id] > MAX_UMID:
+                if leituras[conn.id] > limites["MAX_UMID"]:
                     desligar.append("ATUADOR_RESFRIADOR")
             if conn.type == "SENSOR_CO2":
-                if leituras[conn.id] > MAX_CO2:
+                if leituras[conn.id] > limites["MAX_CO2"]:
                     ligar.append("ATUADOR_INJETORCO2")
-                if leituras[conn.id] < MIN_CO2:
+                if leituras[conn.id] < limites["MIN_CO2"]:
                     desligar.append("ATUADOR_INJETORCO2")
 
         for conn in conexoes:
