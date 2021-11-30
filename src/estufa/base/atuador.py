@@ -27,9 +27,9 @@ def client(atuador, host="127.0.0.1", port=8000):
             print("\t" + data[1])
             if data[1] == atuador.identificador:
                 if data[0] == "ATON":
-                    teste = requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/true/' + atuador.tipo2)
+                    requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/true/' + atuador.tipo2)
                 if data[0] == "ATOF":
-                    teste = requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/false/' + atuador.tipo2)
+                    requests.post('http://127.0.0.1:3000/' + atuador.identificador + '/false/' + atuador.tipo2)
                 
             sock.send("200 OK".encode("utf-8"))
         

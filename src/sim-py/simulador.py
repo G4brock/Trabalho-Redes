@@ -20,15 +20,17 @@ class ThreadSimulador(threading.Thread):
         global UMIDADE
         global CO2
         global ATUADORES
+        
         while True:
+            correcao()
             for atuador in ATUADORES:
                 if atuador["status"] == True:
                     if atuador["tipo"] == "aquecedor":
-                        TEMPERATURA = TEMPERATURA + 0.5
+                        TEMPERATURA = TEMPERATURA + 5
                     if atuador["tipo"] == "resfriador":
-                        TEMPERATURA = TEMPERATURA - 0.5
+                        TEMPERATURA = TEMPERATURA - 5
                     if atuador["tipo"] == "irrigacao":
-                        UMIDADE = UMIDADE + 0.5
+                        UMIDADE = UMIDADE + 3
                     if atuador["tipo"] == "injetorco2":
                         CO2 = CO2 + 10
             time.sleep(1)
@@ -79,6 +81,15 @@ class ThreadWeb(threading.Thread):
     def run(self):
         httpd = server.HTTPServer(("127.0.0.1", 3000), ServidorWeb)
         httpd.serve_forever()
+
+def correcao():
+    global TEMPERATURA
+    global CO2
+    global UMIDADE
+
+    TEMPERATURA += 0.1
+    CO2 -= 0.05
+    UMIDADE -= 0.1
 
 
 if __name__ == "__main__":
