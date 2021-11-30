@@ -138,9 +138,9 @@ async def controlador():
                     desligar.append("ATUADOR_RESFRIADOR")
             if conn.type == "SENSOR_UMIDADE":
                 if leituras[conn.id] < limites["MIN_UMID"]:
-                    ligar.append("ATUADOR_RESFRIADOR")
+                    ligar.append("ATUADOR_IRRIGACAO")
                 if leituras[conn.id] > limites["MAX_UMID"]:
-                    desligar.append("ATUADOR_RESFRIADOR")
+                    desligar.append("ATUADOR_IRRIGACAO")
             if conn.type == "SENSOR_CO2":
                 if leituras[conn.id] > limites["MAX_CO2"]:
                     ligar.append("ATUADOR_INJETORCO2")
