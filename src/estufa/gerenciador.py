@@ -1,6 +1,6 @@
 import asyncio
 import json
-from asyncio import transports
+from asyncio.transports import BaseTransport
 from collections import namedtuple
 from typing import final, Union
 from exceptions import IdentificadorEmUso
@@ -19,19 +19,28 @@ limites = {
 }
 
 
+def enviar_mensagem(msg: str, transport: BaseTransport, id: str) -> None:
+
+    print(f'Enviando > Para: {id}\tMensagem: "{msg.strip()}";')
+    transport.write(msg.encode("utf-8"))
+
+
 class GerenciadorProtocol(asyncio.Protocol):
     def __init__(self) -> None:
         self.identificador = None
         self.tipo = None
         super().__init__()
 
-    def connection_made(self, transport: transports.BaseTransport) -> None:
+    def connection_made(self, transport: BaseTransport) -> None:
         self.transport = transport
         return super().connection_made(transport)
 
+    def responder(self, message: str):
+        enviar_mensagem(message, self.transport, self.identificador)
+
     def data_received(self, data: bytes) -> None:
         message = data.decode().strip()
-        print(f"Mensagem recebida: { message }; De: { self.identificador }")
+        print(f'Recebida < De :{ self.identificador }\tMensagem: "{ message }";')
         message = message.split(" ")
 
         command = message[0]
@@ -49,15 +58,15 @@ class GerenciadorProtocol(asyncio.Protocol):
                 )
                 conexoes.append(self.conexao)
             except IdentificadorEmUso:
-                self.transport.write("410 Identificador em uso.".encode("utf-8"))
+                self.responder("410 Identificador em uso.\n")
                 self.transport.close()
             except:
-                self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
+                self.responder("500 Ocorreu um erro\n")
             else:
-                self.transport.write(f"220 gerenciador Pronto\n".encode("utf-8"))
+                self.responder("220 gerenciador Pronto\n")
 
         if self.identificador == None:
-            self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
+            self.responder("500 Ocorreu um erro\n")
             return
 
         if command == "ATPA":
@@ -67,19 +76,19 @@ class GerenciadorProtocol(asyncio.Protocol):
 
                 if param in limites.keys():
                     limites[param] = valor
-                    self.transport.write("200 Ok\n".encode("utf-8"))
+                    self.responder("200 Ok\n")
                 else:
                     raise Exception
             except:
-                self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
+                self.responder("500 Ocorreu um erro\n")
 
         if command == "SEND":
             try:
                 leituras[self.identificador] = float(message[1])
             except:
-                self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
+                self.responder("500 Ocorreu um erro\n")
             else:
-                self.transport.write("200 Ok\n".encode("utf-8"))
+                self.responder("200 Ok\n")
 
         if command == "READ":
             try:
@@ -93,24 +102,24 @@ class GerenciadorProtocol(asyncio.Protocol):
                     )
                 else:
                     valor = json.dumps({_identificador: leituras[_identificador]})
-                self.transport.write(f"230 { valor }\n".encode("utf-8"))
+                self.responder(f"230 { valor }\n")
             except:
-                self.transport.write("500 Ocorreu um erro\n".encode("utf-8"))
+                self.responder("500 Ocorreu um erro\n")
 
         if command == "ATON":
             _identificador = message[1]
             for c in conexoes:
                 if c.id == _identificador:
-                    c.transport.write(f"ATON { _identificador }\n".encode("utf-8"))
+                    enviar_mensagem(f"ATON { _identificador }\n", c.trasport, c.id)
 
         if command == "ATOF":
             _identificador = message[1]
             for c in conexoes:
                 if c.id == _identificador:
-                    c.transport.write(f"ATOF { _identificador }\n".encode("utf-8"))
+                    enviar_mensagem(f"ATOF { _identificador }\n", c.trasport, c.id)
 
         if command == "QUIT":
-            self.transport.write("200 Ok\n".encode("utf-8"))
+            self.responder("200 Ok\n")
             self.transport.close()
 
         return super().data_received(data)
@@ -154,9 +163,9 @@ async def controlador():
 
         for conn in conexoes:
             if conn.type in ligar:
-                conn.transport.write(f"ATON { conn.id }\n".encode("utf-8"))
+                enviar_mensagem(f"ATON { conn.id }\n", conn.transport, conn.id)
             if conn.type in desligar:
-                conn.transport.write(f"ATOF { conn.id }\n".encode("utf-8"))
+                enviar_mensagem(f"ATOF { conn.id }\n", conn.transport, conn.id)
         await asyncio.sleep(1)
 
 
