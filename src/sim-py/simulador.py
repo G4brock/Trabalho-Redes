@@ -2,7 +2,6 @@ import json
 import threading
 import time
 from http import server
-from collections import namedtuple
 
 TEMPERATURA = 30
 UMIDADE = 50
@@ -20,7 +19,7 @@ class ThreadSimulador(threading.Thread):
         global UMIDADE
         global CO2
         global ATUADORES
-        
+
         while True:
             correcao()
             for atuador in ATUADORES:
@@ -81,6 +80,7 @@ class ThreadWeb(threading.Thread):
     def run(self):
         httpd = server.HTTPServer(("127.0.0.1", 3000), ServidorWeb)
         httpd.serve_forever()
+
 
 def correcao():
     global TEMPERATURA
