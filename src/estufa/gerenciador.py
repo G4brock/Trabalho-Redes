@@ -2,11 +2,22 @@ import asyncio
 import json
 from asyncio.transports import BaseTransport
 from collections import namedtuple
-from typing import final, Union
+from dataclasses import dataclass
+from typing import final, Union, List
 from exceptions import IdentificadorEmUso
 
 Conections = namedtuple("Conection", ["id", "type", "transport"])
 
+
+@dataclass
+class Atuador:
+    id: str
+    type: str
+    conn: BaseTransport
+    status: bool
+
+
+atuadores: List[Atuador] = []
 leituras = {}
 conexoes = []
 limites = {
@@ -56,6 +67,17 @@ class GerenciadorProtocol(asyncio.Protocol):
                 self.conexao = Conections(
                     self.identificador, message[2], self.transport
                 )
+
+                if "ATUADOR" in message[2]:
+                    atuadores.append(
+                        Atuador(
+                            id=self.identificador,
+                            type=message[2],
+                            conn=self.transport,
+                            status=False,
+                        )
+                    )
+
                 conexoes.append(self.conexao)
             except IdentificadorEmUso:
                 self.responder("410 Identificador em uso.\n")
@@ -133,6 +155,10 @@ class GerenciadorProtocol(asyncio.Protocol):
             if self.identificador in leituras.keys():
                 leituras.pop(self.identificador)
 
+            for at in atuadores:
+                if at.id == self.identificador:
+                    atuadores.remove(at)
+
         return super().connection_lost(exc)
 
 
@@ -161,11 +187,13 @@ async def controlador():
                 if leituras[conn.id] < limites["MIN_CO2"]:
                     desligar.append("ATUADOR_INJETORCO2")
 
-        for conn in conexoes:
-            if conn.type in ligar:
-                enviar_mensagem(f"ATON { conn.id }\n", conn.transport, conn.id)
-            if conn.type in desligar:
-                enviar_mensagem(f"ATOF { conn.id }\n", conn.transport, conn.id)
+        for at in atuadores:
+            if at.type in ligar and at.status == False:
+                enviar_mensagem(f"ATON { at.id }\n", at.conn, at.id)
+                at.status = True
+            if at.type in desligar and at.status == True:
+                enviar_mensagem(f"ATOF { at.id }\n", at.conn, at.id)
+                at.status = False
         await asyncio.sleep(1)
 
 
