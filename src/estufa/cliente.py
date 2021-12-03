@@ -1,6 +1,5 @@
 import json
 import socket
-import requests
 
 nome_limites = ["MAX_TEMP", "MIN_TEMP", "MAX_UMID", "MIN_UMID", "MAX_CO2", "MIN_CO2"]
 tipo_atuadores = ["irrigacao", "aquecedor", "injetorco2", "resfriador"]
@@ -45,16 +44,21 @@ def cliente():
                 print("Limites:\t", r["limites"])
 
         if resposta == "oper":
-            print("\tTipos: aquecedor, resfriador, injetorco2 ou irrigacao.")
-            print("\tEstado: true ou false\n")
+            sock.send(f"READ ALL \n".encode("utf-8"))
+            response = sock.recv(1000).decode("utf-8").split(" ")
+            if response[0]:
+                r = json.loads(response[1])
+                print("\nAtuadores:", r["atuadores"])
+
+            print("Estado: true ou false\n")
             
             atuador = input("Qual atuador você deseja operar? ")
-            estado = input("Qual o estado que você deseja colocar esse atuador?")
-            tipo = input("Qual o tipo de atuador? ")
+            estado = input("Qual o estado que você deseja colocar esse atuador?").upper()
 
-            if (estado.lower() == "true" or "false") and (tipo in tipo_atuadores):
-                response = requests.post(f"http://127.0.0.1:3000/{atuador}/{estado}/{tipo}")
-                print(response)
+            if (estado == "ATON" or "ATOF"):
+                sock.send(f"{estado} {atuador}\n".encode("utf-8"))
+                #response = requests.post(f"http://127.0.0.1:3000/{atuador}/{estado}/{tipo}")
+                #print(response)
             else:
                 print(f"valor inválido")
 

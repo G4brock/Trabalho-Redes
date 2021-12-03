@@ -119,7 +119,7 @@ class GerenciadorProtocol(asyncio.Protocol):
                 if _identificador == "ALL":
 
                     valor = json.dumps(
-                        {"leituras": leituras, "limites": limites},
+                        {"leituras": leituras, "limites": limites, "atuadores": [at.id for at in atuadores]},
                         separators=(",", ":"),
                     )
                 else:
@@ -130,15 +130,17 @@ class GerenciadorProtocol(asyncio.Protocol):
 
         if command == "ATON":
             _identificador = message[1]
-            for c in conexoes:
-                if c.id == _identificador:
-                    enviar_mensagem(f"ATON { _identificador }\n", c.trasport, c.id)
+            for atuador in atuadores:
+                if atuador.id == _identificador:
+                    enviar_mensagem(f"ATON { _identificador }\n", atuador.conn, atuador.id)
+                    atuador.status = True
 
         if command == "ATOF":
             _identificador = message[1]
-            for c in conexoes:
-                if c.id == _identificador:
-                    enviar_mensagem(f"ATOF { _identificador }\n", c.trasport, c.id)
+            for atuador in atuadores:
+                if atuador.id == _identificador:
+                    enviar_mensagem(f"ATOF { _identificador }\n", atuador.conn, atuador.id)
+                    atuador.status = False
 
         if command == "QUIT":
             self.responder("200 Ok\n")
