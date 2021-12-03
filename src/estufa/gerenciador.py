@@ -3,7 +3,7 @@ import json
 from asyncio.transports import BaseTransport
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import final, Union, List
+from typing import Union, List
 from exceptions import IdentificadorEmUso
 
 Conections = namedtuple("Conection", ["id", "type", "transport"])
